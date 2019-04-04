@@ -1,5 +1,7 @@
 package com.project;
 
+import java.util.Scanner;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -10,7 +12,10 @@ public class Main {
         System.out.println("4. Exit");
         System.out.println("Please enter [1-4].");
 
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.next();
+
         RecruitmentApp app = new RecruitmentApp();
-        app.run(args);
+        app.run(input);
     }
 }
