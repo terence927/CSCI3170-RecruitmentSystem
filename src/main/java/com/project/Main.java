@@ -16,6 +16,6 @@ public class Main {
         String input = scanner.next();
 
         RecruitmentApp app = new RecruitmentApp();
-        app.run(input);
+        app.run(input, scanner);
     }
 }
