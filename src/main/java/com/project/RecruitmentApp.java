@@ -1,7 +1,5 @@
 package com.project;
 
-import org.apache.commons.cli.*;
-
 public class RecruitmentApp {
 
     public void run(String input) {

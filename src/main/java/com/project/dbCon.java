@@ -1,3 +1,5 @@
+package com.project;
+
 import java.sql.*;
 
 public class dbCon {
@@ -13,7 +15,7 @@ public class dbCon {
             try {
             	con = DriverManager.getConnection(dbAddr,User,pw);
             } catch (SQLException ex) {
-                System.out.println("Failed to connect database"); 
+                System.out.println("Failed to connect to database.");
             }
         } catch (ClassNotFoundException ex) {
             System.out.println("Driver not found."); 
