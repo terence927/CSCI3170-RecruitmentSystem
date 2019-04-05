@@ -3,6 +3,8 @@ package com.project;
 import java.util.Scanner;
 
 public class Administrator {
+    private Scanner scanner;
+
     public void initInfo() {
         System.out.println("Administrator, what would you like to do?");
         System.out.println("1. Create tables");
@@ -14,8 +16,6 @@ public class Administrator {
 
     public void start() {
         System.out.println("Please enter [1-5].");
-
-        Scanner scanner;
         scanner = new Scanner(System.in);
         Integer input = Integer.parseInt(scanner.next());
 
@@ -55,8 +55,7 @@ public class Administrator {
 
     private void loadTables() {
         System.out.println("Please enter the folder path.");
-        Scanner s = new Scanner(System.in);
-        String path = s.next();
+        String path = scanner.next();
 
         // LOAD TABLES LOGIC
 
@@ -72,6 +71,7 @@ public class Administrator {
     }
 
     private void goBack() {
+        scanner.close();
         Main.main(new String[0]);
     }
 
