@@ -4,9 +4,9 @@ public class RecruitmentApp {
 
     public void run(String input) {
         if (Integer.parseInt(input) == 1 ) {
-//            Administrator admin = new Administrator();
-//            admin.start();
-            System.out.println("admin");
+            Administrator admin = new Administrator();
+            admin.initInfo();
+            admin.start();
         } else if (Integer.parseInt(input) == 2) {
 //            Employee emp = new Employee();
 //            emp.start();
@@ -20,6 +20,7 @@ public class RecruitmentApp {
             System.exit(1);
         } else {
             System.out.println("[ERROR] Invalid input!");
+            Main.main(new String[0]);
         }
     }
 }
