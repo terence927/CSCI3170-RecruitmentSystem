@@ -40,15 +40,15 @@ public class Administrator {
     }
 
     private void createTables() {
-        // CREATE TABLES LOGIC
-
+    	backend.createTables();
+    	System.out.println("Processing...Done! Tables are created!");
         initInfo();
         start();
     }
 
     private void deleteTables() {
-        // DELETE TABLES LOGIC
-
+    	backend.deleteTables();
+    	System.out.println("Processing...Done! Tables are deleted!");
         initInfo();
         start();
     }
@@ -56,16 +56,14 @@ public class Administrator {
     private void loadTables() {
         System.out.println("Please enter the folder path.");
         String path = scanner.next();
-
-        // LOAD TABLES LOGIC
-
+        backend.load_data(path);
+        System.out.println("Processing...Done! Data is loaded!");
         initInfo();
         start();
     }
 
     private void checkData() {
-        // CHECK DATA LOGIC
-
+        backend.check_data();
         initInfo();
         start();
     }
