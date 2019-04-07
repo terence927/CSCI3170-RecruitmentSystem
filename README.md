@@ -9,13 +9,12 @@ Random8
 
 ## Compiling
 ### Using Terminal
-Download "Databases.jar" from https://github.com/jiakim/CSCI3170-RecruitmentSystem/tree/master/src/main/java.
-Open the command prompt/terminal. Navigate to the folder containing the downloaded "Databases.jar" file.
-Type "java -jar Databases.jar" to run the program.
+Download "out.jar" from https://github.com/jiakim/CSCI3170-RecruitmentSystem/tree/master/src/main/java.
+Open the command prompt/terminal. Navigate to the folder containing the downloaded "out.jar" file.
+Type "java -jar out.jar" to run the program.
 
 ### Using Eclipse
 Download project from https://github.com/jiakim/CSCI3170-RecruitmentSystem/tree/master/src/main/java.
-Open in Eclipse through "File -> Import" and select the ZIP file.
 Compile and run using Eclipse.
 
 If "Driver is not found." is prompted, install the mysql-connector .JAR
