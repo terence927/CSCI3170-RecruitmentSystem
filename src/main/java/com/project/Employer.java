@@ -46,16 +46,28 @@ public class Employer {
     	Integer salary = Integer.parseInt(scanner.next());
     	System.out.println("Please enter required experience");
     	Integer Exp = Integer.parseInt(scanner.next());
-    	System.out.println(Exp);
+    	//System.out.println(Exp); ???input enter to exit ??? =>  exp=0
     	backend.post_pos(id, title, salary, Exp);
+    	initInfo();
+    	start();
     }
 
     private void checkEmployees() {
-        // LOGIC
+    	System.out.println("Please enter your ID.");
+    	String id = scanner.next();
+    	backend.check_ee(id);
+    	initInfo();
+    	start();
     }
 
     private void acceptEmployee() {
-        // LOGIC
+    	System.out.println("Please enter your ID.");
+    	String erid = scanner.next();
+    	System.out.println("Please enter the employee_ID you want to hire.");
+    	String eeid = scanner.next();
+    	backend.accept_ee(erid,eeid);
+    	initInfo();
+    	start();
     }
 
     private void goBack() {

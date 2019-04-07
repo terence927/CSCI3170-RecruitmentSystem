@@ -3,7 +3,6 @@ package com.project;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.sql.*;
 import java.util.Random;
 import java.util.Scanner;
@@ -472,6 +471,7 @@ public class backend {
 		            r.append((char)nextRandomChar); 
 		        } 
 		        String rnd = r.toString(); 
+		        System.out.println(rnd);
 				String sql2 ="INSERT INTO Position (Position_ID,Position_Title,Salary,Experience,Employer_ID,Status) values (?,?,?,?,?,?);";
 				stmt=con.prepareStatement(sql2);  
 				stmt.setString(1,rnd);
@@ -480,9 +480,93 @@ public class backend {
 				stmt.setInt(4,Exp);
 				stmt.setString(5,id);
 	            stmt.setBoolean(6,true);
+	            stmt.executeUpdate();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}				
+	}
+	public static void check_ee(String erid) {
+		Connection con = null;
+		con = dbCon.getConnection();
+		ResultSet rs = null;
+		try {
+			String sql1 = "SELECT Position_ID FROM Position WHERE Employer_ID = ?;";
+			PreparedStatement stmt=con.prepareStatement(sql1);  
+			stmt.setString(1,erid);
+			rs = stmt.executeQuery();
+			System.out.println("The id of position recruits posted by you are:");
+			while(rs.next())
+				System.out.println(rs.getString(1));
+			System.out.println("Please pick one position id.");
+			Scanner scanner = new Scanner(System.in);
+	        String pid = scanner.next();
+	        System.out.println("The employee who mark interested are:");
+			String sql2 = "SELECT A.Employee_ID, Name, Expected_Salary, Experience, Skills\r\n" + 
+					"FROM Marked M, Employee A\r\n" + 
+					"WHERE M.Position_ID = ? AND M.Employee_ID = A.Employee_ID AND\r\n" + 
+					"M.Status = FALSE";
+			stmt=con.prepareStatement(sql2);  
+			stmt.setString(1,pid);
+			rs = stmt.executeQuery();
+			System.out.println("Employee_ID, Name, Expected_Salary, Experience, Skills");
+			while (rs.next()) {
+				for (int i=1;i<6;i++)
+					System.out.print(rs.getString(i)+" ");
+				System.out.println();
+			}
+			System.out.println("Please pick one employee by Employee_ID.");
+			String eeid = scanner.next();
+			String sql3 = "UPDATE Marked\r\n" + 
+					"SET Status = TRUE\r\n" + 
+					"WHERE Employee_ID= ? AND Position_ID = ?;";
+			stmt=con.prepareStatement(sql3);  
+			stmt.setString(1,eeid);
+			stmt.setString(2,pid);
+			stmt.executeUpdate();
+			System.out.println("An IMMEDIATE interview has done.");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}		
+	}
+	public static void accept_ee(String erid,String eeid) {
+		Connection con = null;
+		con = dbCon.getConnection();
+		ResultSet rs = null;
+		try {
+			String sql1 = "SELECT P.Position_ID\r\n" + 
+					"FROM Marked M, Position P\r\n" + 
+					"WHERE P.Employer_ID=? AND P.Position_ID=M.Position_ID AND M.Status=TRUE AND M.EmployeeID=?;";
+			PreparedStatement stmt=con.prepareStatement(sql1);  
+			stmt.setString(1,erid);
+			stmt.setString(1,eeid);
+			rs = stmt.executeQuery();
+			System.out.println("The id of position recruits posted by you are:");
+			if (rs.next()) {
+				String pid = rs.getString(1);
+				System.out.println("An employment history record is created, details are:");
+				String sql2 = "SELECT Employee_ID, Company, P.Position_ID, NOW()\r\n" + 
+						"FROM Marked M, Position P , Employer E\r\n" + 
+						"WHERE ? = M.Employee_ID AND ? = M.Position_ID AND ? = E.Employer_ID";
+				stmt=con.prepareStatement(sql2);  
+				stmt.setString(1,eeid);
+				stmt.setString(2,pid);
+				stmt.setString(3,eeid);
+				rs = stmt.executeQuery();
+				if (rs.next()) {
+					String sql3="INSERT INTO Employment_History (Employee_ID, Company, Position_ID, Start, End) VALUES (?,?,?,?,NULL);";
+					stmt=con.prepareStatement(sql3);  
+					System.out.println("Employee_ID, Company, Position_ID, Start, End");
+					for (int i=1;i<5;i++)
+					{
+						stmt.setString(i,rs.getString(i));
+						System.out.print(rs.getString(i)+", ");
+					}
+					stmt.executeUpdate();
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }
