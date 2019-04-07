@@ -8,14 +8,18 @@ Random8
 
 
 ## Compiling
-Using Eclipse to open project folder
-(i.e. https://github.com/jiakim/CSCI3170-RecruitmentSystem/tree/master/src/main/java)
+### Using Terminal
+Open the command prompt/terminal. Navigate to the folder containing the downloaded "Databases.jar" file.
+Type "java -jar Databases.jar" to run the program.
 
-Compile it using eclipse.
-If "Driver is not found." is prompted, install the mysql-connector
+### Using Eclipse
+Download project from https://github.com/jiakim/CSCI3170-RecruitmentSystem/tree/master/src/main/java.
+Compile and run using Eclipse.
+
+If "Driver is not found." is prompted, install the mysql-connector .JAR
 (i.e. https://github.com/jiakim/CSCI3170-RecruitmentSystem/tree/master/src/main/java/lib)
 or follow http://www.ccs.neu.edu/home/kathleen/classes/cs3200/JDBCtutorial.pdf
 
 ## Execution
 Put test_data folder at the same path of the executable for data loading
-(test-daata: https://github.com/jiakim/CSCI3170-RecruitmentSystem/tree/master/src/main/java/test_data)
+(test-data: https://github.com/jiakim/CSCI3170-RecruitmentSystem/tree/master/src/main/java/test_data)
