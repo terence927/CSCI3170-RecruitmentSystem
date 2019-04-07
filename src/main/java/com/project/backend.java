@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
 public class backend {
 	public static void createTables() {
@@ -99,7 +102,7 @@ public class backend {
 	public static void load_data(String path) {
 
         final String dir = System.getProperty("user.dir");
-        System.out.println("current dir = " + dir);
+        //System.out.println("current dir = " + dir);
 	    try
 	    {
 	        BufferedReader br = new BufferedReader(new FileReader(dir+"/"+path+"/employee.csv"));
@@ -299,5 +302,130 @@ public class backend {
 			e.printStackTrace();
 		}
 	}	
-
+	public static void show_pos(String id) {
+		Connection con = null;
+		con = dbCon.getConnection();
+		ResultSet rs = null;
+		try {
+			String sql1 = "SELECT Skills FROM Employee WHERE Employee_ID = ?;";
+			PreparedStatement stmt=con.prepareStatement(sql1);  
+			stmt.setString(1,id);
+			rs = stmt.executeQuery();
+			rs.next();
+			String skills = rs.getString(1);
+			String tmp[] = skills.split(";");
+			String tmp2 = "";
+			for (int i = 0;i<tmp.length;i++)
+            	tmp2+="?,";
+			tmp2 = tmp2.substring(0,tmp2.length()-1);
+			System.out.println(tmp2);
+			String sql2 = "SELECT Position_ID, Position_Title, Salary, C.Company, Size, Founded \r\n" + 
+					"FROM Position P, Employer E, Company C, Employee A\r\n" + 
+					"WHERE A.Employee_ID = ? AND " +
+					"P.Employer_ID=E.Employer_ID AND \r\n" + 
+					"E.Company=C.Company AND \r\n" + 
+					"P.Status=TRUE AND \r\n" + 
+					"P.Position_Title IN ("+ tmp2 + ") AND\r\n" + 
+					"P.Salary>=A.Expected_Salary AND \r\n" + 
+					"A.Experience >= P.Experience;";
+			stmt=con.prepareStatement(sql2);  
+			stmt.setString(1,id);
+			for (int i = 0;i<tmp.length;i++)
+				stmt.setString(i+2,tmp[i]);
+			rs = stmt.executeQuery();
+			System.out.println("Position_ID, Position_Title, Salary, Company, Size, Founded");
+			while (rs.next()) {
+				for (int i=1;i<7;i++)
+					System.out.print(rs.getString(i)+" ");
+				System.out.println();
+			}
+				
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}		
+	}		
+	public static void check_avgtime(String id) {
+		Connection con = null;
+		con = dbCon.getConnection();
+		ResultSet rs = null;
+		try {
+			String sql1 = "SELECT datediff(EH.end, EH.start) AS worktime\r\n" + 
+					"FROM Employment_History EH\r\n" + 
+					"WHERE EH.Employee_ID = ? AND EH.End > \"0000-00-00\"\r\n" + 
+					"ORDER BY EH.End DESC limit 3;";
+			PreparedStatement stmt=con.prepareStatement(sql1);  
+			stmt.setString(1,id);
+			rs = stmt.executeQuery();
+			int count =0;
+			int days = 0;
+			while (rs.next()) {
+				count+=1;
+				days += rs.getInt(1);
+			}
+			if (count<3)
+				System.out.println("Less than 3 records.");
+			else
+				System.out.println("Your average working time is: "+days/3+" days.");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}			
+	}
+	public static void mark_pos(String id) {
+		Connection con = null;
+		con = dbCon.getConnection();
+		ResultSet rs = null;
+		try {
+			String sql1 = "SELECT Skills FROM Employee WHERE Employee_ID = ?;";
+			PreparedStatement stmt=con.prepareStatement(sql1);  
+			stmt.setString(1,id);
+			rs = stmt.executeQuery();
+			String skills= "";
+			while(rs.next())
+				skills = rs.getString(1);
+			String tmp[] = skills.split(";");
+			String tmp2 = "";
+			for (int i = 0;i<tmp.length;i++)
+            	tmp2+="?,";
+			tmp2 = tmp2.substring(0,tmp2.length()-1);
+			System.out.println(tmp2);
+			String sql2 = "SELECT Position_ID, Position_Title, Salary, C.Company, Size, Founded \r\n" + 
+					"FROM Position P, Employer E, Company C, Employee A\r\n" + 
+					"WHERE A.Employee_ID = ? AND " +
+					"E.Company NOT IN (SELECT Company FROM Employment_History WHERE Employee_ID = ?) AND "+
+					"P.Employer_ID=E.Employer_ID AND \r\n" + 
+					"E.Company=C.Company AND \r\n" + 
+					"P.Status=TRUE AND \r\n" + 
+					"P.Position_Title NOT IN ("+ tmp2 + ") AND\r\n" + 
+					"P.Salary>=A.Expected_Salary AND \r\n" + 
+					"A.Experience >= P.Experience;";
+			stmt=con.prepareStatement(sql2);  
+			stmt.setString(1,id);
+			stmt.setString(2,id);
+			for (int i = 0;i<tmp.length;i++)
+				stmt.setString(i+3,tmp[i]);
+			rs = stmt.executeQuery();
+			System.out.println("Position_ID, Position_Title, Salary, Company, Size, Founded");
+			Map<String, String> map = new HashMap<String, String>();
+			while (rs.next()) {
+				for (int i=1;i<7;i++)
+					System.out.print(rs.getString(i)+" ");
+				map.put(rs.getString(1),rs.getString(2));
+				System.out.println();
+			}
+			System.out.println("Please enter one interested Position_ID.");
+			Scanner scanner = new Scanner(System.in);
+	        String input2 = scanner.next();
+	        String sk = skills + ";" + map.get(input2);
+	        System.out.println(sk);
+	        String sql3 = "UPDATE Employee SET Skills=? WHERE Employee_ID = ?;";
+	        stmt=con.prepareStatement(sql3);  
+			stmt.setString(1,sk);
+			stmt.setString(2,id);
+			stmt.executeUpdate();
+	        //scanner.close();
+				
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}	
+	}
 }

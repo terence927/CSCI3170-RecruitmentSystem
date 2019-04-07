@@ -39,9 +39,8 @@ public class Employee {
     private void showAvailablePositions() {
         System.out.println("Please enter your ID.");
         String input = scanner.next();
-        Integer id = Integer.parseInt(input);
-
-        // LOGIC
+        //String input = "eebmri";
+        backend.show_pos(input);
 
         initInfo();
         start();
@@ -50,21 +49,16 @@ public class Employee {
     private void markInterestedPosition() {
         System.out.println("Please enter your ID.");
         String input = scanner.next();
-        Integer id = Integer.parseInt(input);
-
-        // LOGIC
-
+        backend.mark_pos(input);
         initInfo();
         start();
     }
 
     private void checkAvgWorkTime() {
         System.out.println("Please enter your ID.");
-        String input = scanner.next();
-        Integer id = Integer.parseInt(input);
-
-        // LOGIC
-
+        String input = scanner.next();//"eeimvg"
+        backend.check_avgtime(input);
+        
         initInfo();
         start();
     }
