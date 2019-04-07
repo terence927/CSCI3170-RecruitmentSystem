@@ -425,6 +425,7 @@ public class backend {
 				System.out.println();
 			}
 			System.out.println("Please enter one interested Position_ID.");
+			@SuppressWarnings("resource")
 			Scanner scanner = new Scanner(System.in);
 	        String input2 = scanner.next();
 	      
@@ -499,6 +500,7 @@ public class backend {
 			while(rs.next())
 				System.out.println(rs.getString(1));
 			System.out.println("Please pick one position id.");
+			@SuppressWarnings("resource")
 			Scanner scanner = new Scanner(System.in);
 	        String pid = scanner.next();
 	        System.out.println("The employee who mark interested are:");

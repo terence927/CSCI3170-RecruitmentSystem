@@ -71,7 +71,7 @@ public class Employer {
     }
 
     private void goBack() {
-        scanner.close();
+        //scanner.close();
         Main.main(new String[0]);
     }
 }
