@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
+import java.util.Random;
+import java.util.Scanner;
 
 public class backend {
 	public static void createTables() {
@@ -69,11 +71,21 @@ public class backend {
 		    		"  \r\n" + 
 		    		"  End Datetime\r\n" + 
 		    		");";
+		    String sql6 = "CREATE TABLE Marked (\r\n" + 
+		    		"\r\n" + 
+		    		"  Position_ID  varchar(6) not null,\r\n" + 
+		    		"  \r\n" + 
+		    		"  Employee_ID varchar(6) not null,\r\n" + 
+		    		"  \r\n" + 
+		    		"  Status BOOLEAN\r\n" + 
+		    		"  \r\n" + 
+		    		");";
 			stmt.executeUpdate(sql1);
 			stmt.executeUpdate(sql2);
 			stmt.executeUpdate(sql3);
 			stmt.executeUpdate(sql4);
 			stmt.executeUpdate(sql5);
+			stmt.executeUpdate(sql6);
 			//stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=1;");
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -91,6 +103,7 @@ public class backend {
 			stmt.executeUpdate("DROP TABLE Employer;");
 			stmt.executeUpdate("DROP TABLE Employment_History;");
 			stmt.executeUpdate("DROP TABLE Position;");
+			stmt.executeUpdate("DROP TABLE Marked;");
 			//stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=1;");
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -99,7 +112,7 @@ public class backend {
 	public static void load_data(String path) {
 
         final String dir = System.getProperty("user.dir");
-        System.out.println("current dir = " + dir);
+        //System.out.println("current dir = " + dir);
 	    try
 	    {
 	        BufferedReader br = new BufferedReader(new FileReader(dir+"/"+path+"/employee.csv"));
@@ -284,6 +297,7 @@ public class backend {
 			String sql3 = "SELECT COUNT(*) FROM Employer;";
 			String sql4 = "SELECT COUNT(*) FROM Position;";
 			String sql5 = "SELECT COUNT(*) FROM Employment_History;";
+			String sql6 = "SELECT COUNT(*) FROM Marked;";
 			Statement stmt=con.createStatement();
 			rs = stmt.executeQuery(sql1);rs.next();
 			System.out.println("Employee: "+rs.getString(1));
@@ -295,9 +309,266 @@ public class backend {
 			System.out.println("Position: "+rs.getString(1));
 			rs = stmt.executeQuery(sql5);rs.next();
 			System.out.println("Employment_History: "+rs.getString(1));
+			rs = stmt.executeQuery(sql6);rs.next();
+			System.out.println("Marked: "+rs.getString(1));
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}	
-
+	public static void show_pos(String id) {
+		Connection con = null;
+		con = dbCon.getConnection();
+		ResultSet rs = null;
+		try {
+			String sql1 = "SELECT Skills FROM Employee WHERE Employee_ID = ?;";
+			PreparedStatement stmt=con.prepareStatement(sql1);  
+			stmt.setString(1,id);
+			rs = stmt.executeQuery();
+			String skills = "";
+			while(rs.next())
+				 skills = rs.getString(1);
+			String tmp[] = skills.split(";");
+			String tmp2 = "";
+			for (int i = 0;i<tmp.length;i++)
+            	tmp2+="?,";
+			tmp2 = tmp2.substring(0,tmp2.length()-1);
+			//System.out.println(tmp2);
+			String sql2 = "SELECT Position_ID, Position_Title, Salary, C.Company, Size, Founded \r\n" + 
+					"FROM Position P, Employer E, Company C, Employee A\r\n" + 
+					"WHERE A.Employee_ID = ? AND " +
+					"P.Employer_ID=E.Employer_ID AND \r\n" + 
+					"E.Company=C.Company AND \r\n" + 
+					"P.Status=TRUE AND \r\n" + 
+					"P.Position_Title IN ("+ tmp2 + ") AND\r\n" + 
+					"P.Salary>=A.Expected_Salary AND \r\n" + 
+					"A.Experience >= P.Experience;";
+			stmt=con.prepareStatement(sql2);  
+			stmt.setString(1,id);
+			for (int i = 0;i<tmp.length;i++)
+				stmt.setString(i+2,tmp[i]);
+			rs = stmt.executeQuery();
+			System.out.println("Position_ID, Position_Title, Salary, Company, Size, Founded");
+			while (rs.next()) {
+				for (int i=1;i<7;i++)
+					System.out.print(rs.getString(i)+" ");
+				System.out.println();
+			}
+				
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}		
+	}		
+	public static void check_avgtime(String id) {
+		Connection con = null;
+		con = dbCon.getConnection();
+		ResultSet rs = null;
+		try {
+			String sql1 = "SELECT datediff(EH.end, EH.start) AS worktime\r\n" + 
+					"FROM Employment_History EH\r\n" + 
+					"WHERE EH.Employee_ID = ? AND EH.End > \"0000-00-00\"\r\n" + 
+					"ORDER BY EH.End DESC limit 3;";
+			PreparedStatement stmt=con.prepareStatement(sql1);  
+			stmt.setString(1,id);
+			rs = stmt.executeQuery();
+			int count =0;
+			int days = 0;
+			while (rs.next()) {
+				count+=1;
+				days += rs.getInt(1);
+			}
+			if (count<3)
+				System.out.println("Less than 3 records.");
+			else
+				System.out.println("Your average working time is: "+days/3+" days.");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}			
+	}
+	public static void mark_pos(String id) {
+		Connection con = null;
+		con = dbCon.getConnection();
+		ResultSet rs = null;
+		try {
+			String sql1 = "SELECT Skills FROM Employee WHERE Employee_ID = ?;";
+			PreparedStatement stmt=con.prepareStatement(sql1);  
+			stmt.setString(1,id);
+			rs = stmt.executeQuery();
+			String skills= "";
+			while(rs.next())
+				skills = rs.getString(1);
+			String tmp[] = skills.split(";");
+			String tmp2 = "";
+			for (int i = 0;i<tmp.length;i++)
+            	tmp2+="?,";
+			tmp2 = tmp2.substring(0,tmp2.length()-1);
+			//System.out.println(tmp2);
+			String sql2 = "SELECT Position_ID, Position_Title, Salary, C.Company, Size, Founded \r\n" + 
+					"FROM Position P, Employer E, Company C, Employee A\r\n" + 
+					"WHERE A.Employee_ID = ? AND " +
+					"E.Company NOT IN (SELECT Company FROM Employment_History WHERE Employee_ID = ?) AND "+
+					"P.Employer_ID=E.Employer_ID AND \r\n" + 
+					"E.Company=C.Company AND \r\n" + 
+					"P.Status=TRUE AND \r\n" + 
+					"P.Position_Title NOT IN ("+ tmp2 + ") AND\r\n" + 
+					"P.Salary>=A.Expected_Salary AND \r\n" + 
+					"A.Experience >= P.Experience;";
+			stmt=con.prepareStatement(sql2);  
+			stmt.setString(1,id);
+			stmt.setString(2,id);
+			for (int i = 0;i<tmp.length;i++)
+				stmt.setString(i+3,tmp[i]);
+			rs = stmt.executeQuery();
+			System.out.println("Position_ID, Position_Title, Salary, Company, Size, Founded");
+			while (rs.next()) {
+				for (int i=1;i<7;i++)
+					System.out.print(rs.getString(i)+" ");
+				System.out.println();
+			}
+			System.out.println("Please enter one interested Position_ID.");
+			@SuppressWarnings("resource")
+			Scanner scanner = new Scanner(System.in);
+	        String input2 = scanner.next();
+	      
+	        String sql3 = "INSERT INTO Marked(Position_ID,Employee_ID,Status) VALUES (?,?,0)";
+	        stmt=con.prepareStatement(sql3);  
+			stmt.setString(1,input2);
+			stmt.setString(2,id);
+			stmt.executeUpdate();
+	        //scanner.close();
+				
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}	
+	}
+	public static void post_pos(String id,String title,Integer salary,Integer Exp) {
+		Connection con = null;
+		con = dbCon.getConnection();
+		ResultSet rs = null;
+		try {
+			String sql1 = "SELECT COUNT(*) FROM Employee A\r\n" + 
+					"WHERE A.Expected_Salary<=? AND A.Experience >= ? AND\r\n" + 
+					"A.Employee_ID NOT IN (SELECT Employee_ID FROM Employment_History WHERE End IS NULL)";
+			PreparedStatement stmt=con.prepareStatement(sql1);  
+			stmt.setInt(1,salary);
+			stmt.setInt(2,Exp);
+			rs = stmt.executeQuery();
+			Integer num = 0;
+			while(rs.next())
+				 num = rs.getInt(1);
+			if (num<1)
+				System.out.println("No potential employees are found. The position recruitment is not posted.");
+			else {
+				System.out.println(num.toString() + " potential employees are found. The position recruitment is posted.");
+		        int n=6;
+				int lowerLimit = 97; 
+		        int upperLimit = 122; 
+		        Random random = new Random(); 
+		        StringBuffer r = new StringBuffer(n); 
+		  
+		        for (int i = 0; i < n; i++) { 
+		            int nextRandomChar = lowerLimit 
+		                                 + (int)(random.nextFloat() 
+		                                         * (upperLimit - lowerLimit + 1)); 
+		            r.append((char)nextRandomChar); 
+		        } 
+		        String rnd = r.toString(); 
+		        //System.out.println(rnd);
+				String sql2 ="INSERT INTO Position (Position_ID,Position_Title,Salary,Experience,Employer_ID,Status) values (?,?,?,?,?,?);";
+				stmt=con.prepareStatement(sql2);  
+				stmt.setString(1,rnd);
+				stmt.setString(2,title);  
+				stmt.setInt(3,salary);
+				stmt.setInt(4,Exp);
+				stmt.setString(5,id);
+	            stmt.setBoolean(6,true);
+	            stmt.executeUpdate();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}				
+	}
+	public static void check_ee(String erid) {
+		Connection con = null;
+		con = dbCon.getConnection();
+		ResultSet rs = null;
+		try {
+			String sql1 = "SELECT Position_ID FROM Position WHERE Employer_ID = ?;";
+			PreparedStatement stmt=con.prepareStatement(sql1);  
+			stmt.setString(1,erid);
+			rs = stmt.executeQuery();
+			System.out.println("The id of position recruits posted by you are:");
+			while(rs.next())
+				System.out.println(rs.getString(1));
+			System.out.println("Please pick one position id.");
+			@SuppressWarnings("resource")
+			Scanner scanner = new Scanner(System.in);
+	        String pid = scanner.next();
+	        System.out.println("The employee who mark interested are:");
+			String sql2 = "SELECT A.Employee_ID, Name, Expected_Salary, Experience, Skills\r\n" + 
+					"FROM Marked M, Employee A\r\n" + 
+					"WHERE M.Position_ID = ? AND M.Employee_ID = A.Employee_ID AND\r\n" + 
+					"M.Status = FALSE";
+			stmt=con.prepareStatement(sql2);  
+			stmt.setString(1,pid);
+			rs = stmt.executeQuery();
+			System.out.println("Employee_ID, Name, Expected_Salary, Experience, Skills");
+			while (rs.next()) {
+				for (int i=1;i<6;i++)
+					System.out.print(rs.getString(i)+" ");
+				System.out.println();
+			}
+			System.out.println("Please pick one employee by Employee_ID.");
+			String eeid = scanner.next();
+			String sql3 = "UPDATE Marked\r\n" + 
+					"SET Status = TRUE\r\n" + 
+					"WHERE Employee_ID= ? AND Position_ID = ?;";
+			stmt=con.prepareStatement(sql3);  
+			stmt.setString(1,eeid);
+			stmt.setString(2,pid);
+			stmt.executeUpdate();
+			System.out.println("An IMMEDIATE interview has done.");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}		
+	}
+	public static void accept_ee(String erid,String eeid) {
+		Connection con = null;
+		con = dbCon.getConnection();
+		ResultSet rs = null;
+		try {
+			String sql1 = "SELECT P.Position_ID\r\n" + 
+					"FROM Marked M, Position P\r\n" + 
+					"WHERE P.Employer_ID=? AND P.Position_ID=M.Position_ID AND M.Status=TRUE AND M.EmployeeID=?;";
+			PreparedStatement stmt=con.prepareStatement(sql1);  
+			stmt.setString(1,erid);
+			stmt.setString(1,eeid);
+			rs = stmt.executeQuery();
+			System.out.println("The id of position recruits posted by you are:");
+			if (rs.next()) {
+				String pid = rs.getString(1);
+				System.out.println("An employment history record is created, details are:");
+				String sql2 = "SELECT Employee_ID, Company, P.Position_ID, NOW()\r\n" + 
+						"FROM Marked M, Position P , Employer E\r\n" + 
+						"WHERE ? = M.Employee_ID AND ? = M.Position_ID AND ? = E.Employer_ID";
+				stmt=con.prepareStatement(sql2);  
+				stmt.setString(1,eeid);
+				stmt.setString(2,pid);
+				stmt.setString(3,eeid);
+				rs = stmt.executeQuery();
+				if (rs.next()) {
+					String sql3="INSERT INTO Employment_History (Employee_ID, Company, Position_ID, Start, End) VALUES (?,?,?,?,NULL);";
+					stmt=con.prepareStatement(sql3);  
+					System.out.println("Employee_ID, Company, Position_ID, Start, End");
+					for (int i=1;i<5;i++)
+					{
+						stmt.setString(i,rs.getString(i));
+						System.out.print(rs.getString(i)+", ");
+					}
+					stmt.executeUpdate();
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 }
