@@ -311,14 +311,15 @@ public class backend {
 			PreparedStatement stmt=con.prepareStatement(sql1);  
 			stmt.setString(1,id);
 			rs = stmt.executeQuery();
-			rs.next();
-			String skills = rs.getString(1);
+			String skills = "";
+			while(rs.next())
+				 skills = rs.getString(1);
 			String tmp[] = skills.split(";");
 			String tmp2 = "";
 			for (int i = 0;i<tmp.length;i++)
             	tmp2+="?,";
 			tmp2 = tmp2.substring(0,tmp2.length()-1);
-			System.out.println(tmp2);
+			//System.out.println(tmp2);
 			String sql2 = "SELECT Position_ID, Position_Title, Salary, C.Company, Size, Founded \r\n" + 
 					"FROM Position P, Employer E, Company C, Employee A\r\n" + 
 					"WHERE A.Employee_ID = ? AND " +
@@ -387,7 +388,7 @@ public class backend {
 			for (int i = 0;i<tmp.length;i++)
             	tmp2+="?,";
 			tmp2 = tmp2.substring(0,tmp2.length()-1);
-			System.out.println(tmp2);
+			//System.out.println(tmp2);
 			String sql2 = "SELECT Position_ID, Position_Title, Salary, C.Company, Size, Founded \r\n" + 
 					"FROM Position P, Employer E, Company C, Employee A\r\n" + 
 					"WHERE A.Employee_ID = ? AND " +
@@ -416,7 +417,7 @@ public class backend {
 			Scanner scanner = new Scanner(System.in);
 	        String input2 = scanner.next();
 	        String sk = skills + ";" + map.get(input2);
-	        System.out.println(sk);
+	        //System.out.println(sk);
 	        String sql3 = "UPDATE Employee SET Skills=? WHERE Employee_ID = ?;";
 	        stmt=con.prepareStatement(sql3);  
 			stmt.setString(1,sk);
