@@ -471,7 +471,7 @@ public class backend {
 		            r.append((char)nextRandomChar); 
 		        } 
 		        String rnd = r.toString(); 
-		        System.out.println(rnd);
+		        //System.out.println(rnd);
 				String sql2 ="INSERT INTO Position (Position_ID,Position_Title,Salary,Experience,Employer_ID,Status) values (?,?,?,?,?,?);";
 				stmt=con.prepareStatement(sql2);  
 				stmt.setString(1,rnd);
