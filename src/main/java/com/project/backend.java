@@ -3,9 +3,9 @@ package com.project;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 
 public class backend {
@@ -72,11 +72,21 @@ public class backend {
 		    		"  \r\n" + 
 		    		"  End Datetime\r\n" + 
 		    		");";
+		    String sql6 = "CREATE TABLE Marked (\r\n" + 
+		    		"\r\n" + 
+		    		"  Position_ID  varchar(6) not null,\r\n" + 
+		    		"  \r\n" + 
+		    		"  Employee_ID varchar(6) not null,\r\n" + 
+		    		"  \r\n" + 
+		    		"  Status BOOLEAN\r\n" + 
+		    		"  \r\n" + 
+		    		");";
 			stmt.executeUpdate(sql1);
 			stmt.executeUpdate(sql2);
 			stmt.executeUpdate(sql3);
 			stmt.executeUpdate(sql4);
 			stmt.executeUpdate(sql5);
+			stmt.executeUpdate(sql6);
 			//stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=1;");
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -94,6 +104,7 @@ public class backend {
 			stmt.executeUpdate("DROP TABLE Employer;");
 			stmt.executeUpdate("DROP TABLE Employment_History;");
 			stmt.executeUpdate("DROP TABLE Position;");
+			stmt.executeUpdate("DROP TABLE Marked;");
 			//stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=1;");
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -287,6 +298,7 @@ public class backend {
 			String sql3 = "SELECT COUNT(*) FROM Employer;";
 			String sql4 = "SELECT COUNT(*) FROM Position;";
 			String sql5 = "SELECT COUNT(*) FROM Employment_History;";
+			String sql6 = "SELECT COUNT(*) FROM Marked;";
 			Statement stmt=con.createStatement();
 			rs = stmt.executeQuery(sql1);rs.next();
 			System.out.println("Employee: "+rs.getString(1));
@@ -298,6 +310,8 @@ public class backend {
 			System.out.println("Position: "+rs.getString(1));
 			rs = stmt.executeQuery(sql5);rs.next();
 			System.out.println("Employment_History: "+rs.getString(1));
+			rs = stmt.executeQuery(sql6);rs.next();
+			System.out.println("Marked: "+rs.getString(1));
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -406,21 +420,18 @@ public class backend {
 				stmt.setString(i+3,tmp[i]);
 			rs = stmt.executeQuery();
 			System.out.println("Position_ID, Position_Title, Salary, Company, Size, Founded");
-			Map<String, String> map = new HashMap<String, String>();
 			while (rs.next()) {
 				for (int i=1;i<7;i++)
 					System.out.print(rs.getString(i)+" ");
-				map.put(rs.getString(1),rs.getString(2));
 				System.out.println();
 			}
 			System.out.println("Please enter one interested Position_ID.");
 			Scanner scanner = new Scanner(System.in);
 	        String input2 = scanner.next();
-	        String sk = skills + ";" + map.get(input2);
-	        //System.out.println(sk);
-	        String sql3 = "UPDATE Employee SET Skills=? WHERE Employee_ID = ?;";
+	      
+	        String sql3 = "INSERT INTO Marked(Position_ID,Employee_ID,Status) VALUES (?,?,0)";
 	        stmt=con.prepareStatement(sql3);  
-			stmt.setString(1,sk);
+			stmt.setString(1,input2);
 			stmt.setString(2,id);
 			stmt.executeUpdate();
 	        //scanner.close();
@@ -428,5 +439,50 @@ public class backend {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}	
+	}
+	public static void post_pos(String id,String title,Integer salary,Integer Exp) {
+		Connection con = null;
+		con = dbCon.getConnection();
+		ResultSet rs = null;
+		try {
+			String sql1 = "SELECT COUNT(*) FROM Employee A\r\n" + 
+					"WHERE A.Expected_Salary<=? AND A.Experience >= ? AND\r\n" + 
+					"A.Employee_ID NOT IN (SELECT Employee_ID FROM Employment_History WHERE End IS NULL)";
+			PreparedStatement stmt=con.prepareStatement(sql1);  
+			stmt.setInt(1,salary);
+			stmt.setInt(2,Exp);
+			rs = stmt.executeQuery();
+			Integer num = 0;
+			while(rs.next())
+				 num = rs.getInt(1);
+			if (num<1)
+				System.out.println("No potential employees are found. The position recruitment is not posted.");
+			else {
+				System.out.println(num.toString() + " potential employees are found. The position recruitment is posted.");
+		        int n=6;
+				int lowerLimit = 97; 
+		        int upperLimit = 122; 
+		        Random random = new Random(); 
+		        StringBuffer r = new StringBuffer(n); 
+		  
+		        for (int i = 0; i < n; i++) { 
+		            int nextRandomChar = lowerLimit 
+		                                 + (int)(random.nextFloat() 
+		                                         * (upperLimit - lowerLimit + 1)); 
+		            r.append((char)nextRandomChar); 
+		        } 
+		        String rnd = r.toString(); 
+				String sql2 ="INSERT INTO Position (Position_ID,Position_Title,Salary,Experience,Employer_ID,Status) values (?,?,?,?,?,?);";
+				stmt=con.prepareStatement(sql2);  
+				stmt.setString(1,rnd);
+				stmt.setString(2,title);  
+				stmt.setInt(3,salary);
+				stmt.setInt(4,Exp);
+				stmt.setString(5,id);
+	            stmt.setBoolean(6,true);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}				
 	}
 }

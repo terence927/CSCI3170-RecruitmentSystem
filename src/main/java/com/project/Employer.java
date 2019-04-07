@@ -37,7 +37,17 @@ public class Employer {
     }
 
     private void postPosition() {
-        // LOGIC
+    	scanner = new Scanner(System.in);
+    	System.out.println("Please enter your ID.");
+    	String id = scanner.next();
+    	System.out.println("Please enter the position title.");
+    	String title = scanner.next();
+    	System.out.println("Please enter an upper bound of salary.");
+    	Integer salary = Integer.parseInt(scanner.next());
+    	System.out.println("Please enter required experience");
+    	Integer Exp = Integer.parseInt(scanner.next());
+    	System.out.println(Exp);
+    	backend.post_pos(id, title, salary, Exp);
     }
 
     private void checkEmployees() {
